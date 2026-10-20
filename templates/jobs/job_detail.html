@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} | Plataforma de Vagas{% endblock %}
+
+{% block content %}
+<article class="card">
+    <p><a href="{% url 'jobs:list' %}">← Ver todas as vagas</a></p>
+    <h1>{{ job.title }}</h1>
+    <p><strong>{{ job.company.name }}</strong> · {{ job.area }}</p>
+    <p>{{ job.city|default:"Localização não informada" }} · {{ job.get_work_mode_display }}</p>
+    {% if job.application_deadline %}<p>Inscrições até {{ job.application_deadline|date:"d/m/Y" }}</p>{% endif %}
+    <h2>Sobre a vaga</h2>
+    <p>{{ job.description|linebreaks }}</p>
+    {% if job.requirements.exists %}
+        <h2>Competências</h2>
+        <ul>{% for requirement in job.requirements.all %}<li>{{ requirement.skill.name }}{% if requirement.is_required %} (obrigatória){% else %} (desejável){% endif %}</li>{% endfor %}</ul>
+    {% endif %}
+    {% if user.is_authenticated %}
+        {% if already_applied %}
+            <p class="muted">Você já se candidatou a esta vaga. Acompanhe o status no seu painel.</p>
+            <a href="{% url 'candidates:dashboard' %}">Meu painel</a>
+        {% else %}
+            <form method="post" action="{% url 'applications:apply' job.pk %}">
+                {% csrf_token %}<button type="submit">Candidatar-se</button>
+            </form>
+        {% endif %}
+    {% else %}
+        <p><a class="button" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">Entre para acompanhar esta vaga</a></p>
+    {% endif %}
+</article>
+{% endblock %}

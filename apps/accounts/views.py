@@ -4,7 +4,7 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
-from .forms import CadastroForm
+from .forms import CadastroForm, EntrarForm
 
 
 class CadastroView(CreateView):
@@ -20,4 +20,5 @@ class CadastroView(CreateView):
 
 class EntrarView(LoginView):
     template_name = "registration/login.html"
+    form_class = EntrarForm
     redirect_authenticated_user = True

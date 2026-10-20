@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Meu painel | Plataforma de Vagas{% endblock %}
+{% block content %}
+<section class="card">
+    <h1>Olá, {{ user.first_name|default:user.email }}</h1>
+    <p>Perfil: {% if profile.is_complete %}completo{% else %}incompleto{% endif %}</p>
+    <p><a class="button" href="{% url 'candidates:profile' %}">Editar perfil</a></p>
+</section>
+<section class="card" style="margin-top:18px">
+    <h2>Currículo</h2>
+    {% if active_resume %}<p>Currículo enviado em {{ active_resume.uploaded_at|date:"d/m/Y" }} · <a href="{% url 'candidates:resume_download' active_resume.pk %}">Baixar meu currículo</a></p>{% else %}<p class="muted">Você ainda não enviou um currículo.</p>{% endif %}
+    <form method="post" enctype="multipart/form-data" action="{% url 'candidates:resume_upload' %}">
+        {% csrf_token %}<label for="resume-file">Enviar ou substituir currículo (PDF, até 5 MB)</label>
+        <input class="form-control" id="resume-file" name="file" type="file" accept=".pdf,application/pdf" required>
+        <button style="margin-top:12px" type="submit">Enviar currículo</button>
+    </form>
+</section>
+<section style="margin-top:24px">
+    <h2>Vagas recomendadas</h2>
+    {% for job, match in recommended_jobs %}
+        <article class="card" style="margin-bottom:16px">
+            <h3><a href="{% url 'jobs:detail' job.pk %}">{{ job.title }}</a></h3>
+            <p>{{ job.company.name }} · Compatibilidade: {{ match.score }}%</p>
+            <p class="muted">{{ match.explanation }}{% if match.missing_required_skills %} Requisitos obrigatórios ausentes: {{ match.missing_required_skills|join:", " }}.{% endif %}</p>
+        </article>
+    {% empty %}<div class="card"><p>Complete suas competências ou volte quando houver vagas com requisitos cadastrados.</p></div>{% endfor %}
+</section>
+<section style="margin-top:24px">
+    <h2>Minhas candidaturas</h2>
+    <p>{{ application_total }} candidatura(s)</p>
+    {% for item in application_counts %}<span class="badge text-bg-primary">{{ item.total }} · {{ item.status }}</span> {% endfor %}
+    {% for application in applications %}
+        <article class="card" style="margin-bottom:16px">
+            <h3><a href="{% url 'jobs:detail' application.job.pk %}">{{ application.job.title }}</a></h3>
+            <p>{{ application.job.company.name }} · {{ application.get_status_display }}</p>
+            {% if application.status == "received" or application.status == "review" %}
+                <form method="post" action="{% url 'applications:withdraw' application.pk %}">
+                    {% csrf_token %}<button type="submit">Retirar candidatura</button>
+                </form>
+            {% endif %}
+        </article>
+    {% empty %}
+        <div class="card"><p>Você ainda não enviou candidaturas.</p><a href="{% url 'jobs:list' %}">Explorar vagas</a></div>
+    {% endfor %}
+</section>
+{% endblock %}

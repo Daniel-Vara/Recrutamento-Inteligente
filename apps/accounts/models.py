@@ -10,7 +10,7 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError("O e-mail é obrigatório.")
 
-        email = self.normalize_email(email)
+        email = self.normalize_email(email).casefold()
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)

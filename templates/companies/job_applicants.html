@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Candidatos: {{ job.title }} | Plataforma de Vagas{% endblock %}
+{% block content %}
+<section class="card">
+    <p><a href="{% url 'companies:dashboard' %}">← Painel da empresa</a></p>
+    <h1>Candidatos para {{ job.title }}</h1>
+    <p class="muted">Somente responsáveis ativos por esta empresa podem consultar esta lista.</p>
+</section>
+{% for application in applications %}
+<article class="card" style="margin-top:16px">
+    <h2>{{ application.candidate.full_name }}</h2>
+    <p>{{ application.candidate.city|default:"Cidade não informada" }} · {{ application.get_status_display }}</p>
+    {% if application.resume %}<p><a href="{% url 'candidates:resume_download' application.resume.pk %}">Consultar currículo enviado nesta candidatura</a></p>{% endif %}
+    {% if application.candidate.summary %}<p>{{ application.candidate.summary|linebreaks }}</p>{% endif %}
+    {% if application.candidate.skills.all %}<p>Competências: {% for item in application.candidate.skills.all %}{{ item.skill.name }} ({{ item.get_level_display }}){% if not forloop.last %}, {% endif %}{% empty %}não informadas{% endfor %}</p>{% endif %}
+    {% if application.status == "received" or application.status == "review" or application.status == "interview" %}
+        <form method="post" action="{% url 'companies:application_status' company.pk job.pk application.pk %}">
+            {% csrf_token %}
+            <label for="status-{{ application.pk }}">Atualizar status</label>
+            <select class="form-control" id="status-{{ application.pk }}" name="status" required>
+                <option value="review">Em análise</option>
+                <option value="interview">Entrevista</option>
+                <option value="approved">Aprovada</option>
+                <option value="rejected">Rejeitada</option>
+            </select>
+            <label for="note-{{ application.pk }}">Observação opcional</label>
+            <input class="form-control" id="note-{{ application.pk }}" name="note" maxlength="250">
+            <button style="margin-top:12px" type="submit">Salvar status</button>
+        </form>
+    {% endif %}
+</article>
+{% empty %}
+<section class="card" style="margin-top:16px"><p>Ainda não há candidaturas para esta vaga.</p></section>
+{% endfor %}
+{% endblock %}

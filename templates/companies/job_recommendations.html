@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Recomendações: {{ job.title }} | Plataforma de Vagas{% endblock %}
+{% block content %}
+<section class="card">
+    <p><a href="{% url 'companies:dashboard' %}">← Painel da empresa</a></p>
+    <h1>Candidatos recomendados para {{ job.title }}</h1>
+    <p class="muted">A lista inclui somente candidatos que permitiram aparecer em recomendações. A pontuação compara competências declaradas com os requisitos desta vaga.</p>
+</section>
+{% for profile, match in recommendations %}
+<article class="card" style="margin-top:16px">
+    <h2>{{ profile.full_name }} · {{ match.score }}%</h2>
+    <p>{{ profile.city }}</p>
+    <p>{{ profile.summary|linebreaks }}</p>
+    <p>Correspondências: {{ match.matched_skills|join:", "|default:"nenhuma" }}</p>
+    <p>Competências ausentes: {{ match.missing_skills|join:", "|default:"nenhuma" }}</p>
+    {% if match.missing_required_skills %}<p>Obrigatórias ausentes: {{ match.missing_required_skills|join:", " }}</p>{% endif %}
+    <p class="muted">{{ match.explanation }}</p>
+</article>
+{% empty %}
+<section class="card" style="margin-top:16px"><p>Nenhum candidato optou por aparecer nas recomendações desta vaga.</p></section>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Painel da empresa | Plataforma de Vagas{% endblock %}
+{% block content %}
+<section class="card">
+    <h1>Minhas empresas</h1>
+    <a class="button" href="{% url 'companies:create' %}">Cadastrar empresa</a>
+</section>
+{% for company in companies %}
+<section class="card" style="margin-top:18px">
+    <h2>{{ company.name }}</h2>
+    <p>{{ company.city }}</p>
+    <p>Vagas publicadas: {{ company.published_jobs }} · encerradas/arquivadas: {{ company.closed_jobs }} · candidaturas: {{ company.application_total }}</p>
+    <p><a href="{% url 'companies:edit' company.pk %}">Editar dados</a> · <a href="{% url 'companies:job_create' company.pk %}">Criar vaga</a></p>
+    <h3>Vagas</h3>
+    {% for job in company.jobs.all %}
+        <div style="border-top:1px solid #e5e7eb;padding:12px 0">
+            <strong>{{ job.title }}</strong> · {{ job.get_status_display }}
+            <a href="{% url 'companies:job_applicants' company.pk job.pk %}">Ver candidatos ({{ job.applications.count }})</a>
+            <a href="{% url 'companies:job_recommendations' company.pk job.pk %}">Ver recomendações</a>
+            <a href="{% url 'companies:job_edit' company.pk job.pk %}">Editar vaga</a>
+            {% if job.status == "draft" %}
+                <form method="post" action="{% url 'companies:job_status' company.pk job.pk 'publish' %}" style="display:inline">{% csrf_token %}<button type="submit">Publicar</button></form>
+            {% elif job.status == "published" %}
+                <form method="post" action="{% url 'companies:job_status' company.pk job.pk 'close' %}" style="display:inline">{% csrf_token %}<button type="submit">Encerrar</button></form>
+            {% endif %}
+            {% if job.status == "closed" or job.status == "draft" %}
+                <form method="post" action="{% url 'companies:job_status' company.pk job.pk 'archive' %}" style="display:inline">{% csrf_token %}<button type="submit">Arquivar</button></form>
+            {% endif %}
+        </div>
+    {% empty %}<p class="muted">Ainda não há vagas para esta empresa.</p>{% endfor %}
+</section>
+{% empty %}
+<section class="card" style="margin-top:18px"><p>Você ainda não está vinculado a uma empresa.</p></section>
+{% endfor %}
+{% if application_counts %}<section class="card" style="margin-top:18px"><h2>Candidaturas por status</h2>{% for item in application_counts %}<span class="badge text-bg-primary">{{ item.total }} · {{ item.status }}</span> {% endfor %}</section>{% endif %}
+{% endblock %}

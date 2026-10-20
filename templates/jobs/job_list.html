@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Vagas | Plataforma de Vagas{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Talentos e oportunidades em um só lugar</h1>
+    <p>Encontre vagas que combinam com suas competências e acompanhe suas candidaturas em um só painel.</p>
+    <p class="muted">Pesquise vagas publicadas por título, área, cidade ou competência.</p>
+    <form method="get" role="search">
+        <label for="q">Título ou área</label>
+        <input class="form-control" id="q" name="q" value="{{ request.GET.q }}">
+        <label for="city">Cidade</label>
+        <input class="form-control" id="city" name="city" value="{{ request.GET.city }}">
+        <label for="skill">Competência</label>
+        <input class="form-control" id="skill" name="skill" value="{{ request.GET.skill }}">
+        <label for="sort">Ordenar por</label>
+        <select class="form-control" id="sort" name="sort">
+            <option value="newest" {% if request.GET.sort == "newest" or not request.GET.sort %}selected{% endif %}>Mais recentes</option>
+            <option value="title" {% if request.GET.sort == "title" %}selected{% endif %}>Título</option>
+            <option value="deadline" {% if request.GET.sort == "deadline" %}selected{% endif %}>Prazo</option>
+        </select>
+        <button class="full-width" type="submit">Buscar vagas</button>
+    </form>
+</section>
+
+<section class="card" style="margin-top:20px" aria-label="Conheça a plataforma">
+    <h2>Uma busca mais clara para cada lado</h2>
+    <p>Candidatos acompanham suas inscrições. Empresas organizam vagas e avaliam candidaturas com critérios explicáveis.</p>
+    <a class="button" href="{% url 'accounts:register' %}">Criar conta de candidato</a>
+    <a class="button" href="{% url 'companies:create' %}">Cadastrar uma empresa</a>
+</section>
+
+<section aria-label="Vagas disponíveis" style="margin-top:24px">
+    {% for job in jobs %}
+        <article class="card" style="margin-bottom:16px">
+            <h2><a href="{% url 'jobs:detail' job.pk %}">{{ job.title }}</a></h2>
+            <p>{{ job.company.name }} · {{ job.area }}</p>
+            <p class="muted">{{ job.city|default:"Localização não informada" }} · {{ job.get_work_mode_display }}</p>
+        </article>
+    {% empty %}
+        <div class="card"><h2>Nenhuma vaga encontrada</h2><p>Tente ajustar os filtros ou volte mais tarde.</p></div>
+    {% endfor %}
+</section>
+
+{% if is_paginated %}
+<nav aria-label="Paginação" class="links">
+    {% if page_obj.has_previous %}<a href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.city %}city={{ request.GET.city|urlencode }}&{% endif %}{% if request.GET.skill %}skill={{ request.GET.skill|urlencode }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+    <span class="muted">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.city %}city={{ request.GET.city|urlencode }}&{% endif %}{% if request.GET.skill %}skill={{ request.GET.skill|urlencode }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">Próxima</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

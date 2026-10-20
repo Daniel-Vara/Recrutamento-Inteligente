@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+PRIVATE_MEDIA_ROOT = Path(os.getenv("PRIVATE_MEDIA_ROOT", BASE_DIR / "private_media"))
 
 load_dotenv(BASE_DIR / ".env")
 # Quick-start development settings - unsuitable for production
@@ -41,6 +42,26 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
+SECURE_SSL_REDIRECT = os.getenv(
+    "DJANGO_SECURE_SSL_REDIRECT", str(not DEBUG)
+).lower() == "true"
+SESSION_COOKIE_SECURE = os.getenv(
+    "DJANGO_SESSION_COOKIE_SECURE", str(not DEBUG)
+).lower() == "true"
+CSRF_COOKIE_SECURE = os.getenv(
+    "DJANGO_CSRF_COOKIE_SECURE", str(not DEBUG)
+).lower() == "true"
+SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_HSTS_SECONDS", "0"))
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+X_FRAME_OPTIONS = "DENY"
+
 
 # Application definition
 
@@ -52,7 +73,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "rest_framework",
+    "rest_framework.authtoken",
+    "drf_spectacular",
     "apps.accounts.apps.AccountsConfig",
+    "apps.candidates.apps.CandidatesConfig",
+    "apps.companies.apps.CompaniesConfig",
+    "apps.jobs.apps.JobsConfig",
+    "apps.applications.apps.ApplicationsConfig",
+    "apps.api.apps.ApiConfig",
 ]
 
 MIDDLEWARE = [
@@ -151,3 +179,23 @@ LOGOUT_REDIRECT_URL = "/contas/login/"
 # Durante o desenvolvimento, os e-mails aparecem no terminal.
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "nao-responda@plataforma-vagas.local"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Plataforma Inteligente de Vagas API",
+    "DESCRIPTION": "API versionada para vagas, empresas, perfis e candidaturas.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}

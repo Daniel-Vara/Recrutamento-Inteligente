@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Empresa | Plataforma de Vagas{% endblock %}
+{% block content %}
+<section class="card">
+    <h1>{% if company %}Editar empresa{% else %}Cadastrar empresa{% endif %}</h1>
+    <form method="post">{% csrf_token %}
+        {% for field in form %}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}{% endfor %}
+        <button class="full-width" type="submit">Salvar</button>
+    </form>
+</section>
+{% endblock %}

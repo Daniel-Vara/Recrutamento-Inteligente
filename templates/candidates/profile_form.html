@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Meu perfil | Plataforma de Vagas{% endblock %}
+{% block content %}
+<section class="card">
+    <h1>Perfil profissional</h1>
+    <p class="muted">Informe seu nome, cidade, resumo e competências para receber recomendações.</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}{{ field.errors }}
+        {% endfor %}
+        <button class="full-width" type="submit">Salvar perfil</button>
+    </form>
+</section>
+{% endblock %}

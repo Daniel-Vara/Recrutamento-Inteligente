@@ -38,7 +38,7 @@ class AutenticacaoTests(TestCase):
         response = self.client.post(
             reverse("accounts:login"),
             {
-                "username": "teste@example.com",
+                "username": "TESTE@EXAMPLE.COM",
                 "password": "UmaSenhaForte123!",
             },
         )
