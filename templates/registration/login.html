@@ -1,0 +1,52 @@
+
+{% extends "base.html" %}
+
+{% block title %}Entrar | Plataforma de Vagas{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Entrar</h1>
+    <p class="muted">Acesse sua conta com seu e-mail.</p>
+
+    {% if form.errors %}
+        <p class="error">
+            Não foi possível entrar. Confira o e-mail e a senha.
+        </p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label for="{{ form.username.id_for_label }}">E-mail</label>
+        <input
+            class="form-control"
+            type="email"
+            name="username"
+            id="{{ form.username.id_for_label }}"
+            autocomplete="email"
+            required
+        >
+
+        <label for="{{ form.password.id_for_label }}">Senha</label>
+        <input
+            class="form-control"
+            type="password"
+            name="password"
+            id="{{ form.password.id_for_label }}"
+            autocomplete="current-password"
+            required
+        >
+
+        {% if next %}
+            <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+
+        <button class="full-width" type="submit">Entrar</button>
+    </form>
+
+    <div class="links">
+        <p><a href="{% url 'accounts:password_reset' %}">Esqueci minha senha</a></p>
+        <p>Não tem conta? <a href="{% url 'accounts:register' %}">Cadastre-se</a></p>
+    </div>
+</section>
+{% endblock %}

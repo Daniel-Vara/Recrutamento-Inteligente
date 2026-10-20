@@ -1,0 +1,39 @@
+
+{% extends "base.html" %}
+
+{% block title %}Criar conta | Plataforma de Vagas{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Criar conta</h1>
+    <p class="muted">Comece a usar a Plataforma de Vagas.</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="error">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        {% for field in form %}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+
+            {% if field.help_text %}
+                <small class="helptext">{{ field.help_text|safe }}</small>
+            {% endif %}
+
+            {% for error in field.errors %}
+                <p class="error">{{ error }}</p>
+            {% endfor %}
+        {% endfor %}
+
+        <button class="full-width" type="submit">Criar minha conta</button>
+    </form>
+
+    <p class="links">
+        Já tem conta?
+        <a href="{% url 'accounts:login' %}">Entrar</a>
+    </p>
+</section>
+{% endblock %}
